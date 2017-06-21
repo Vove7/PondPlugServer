@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Vove on 2017/4/16.
+ * 矩阵信息&操作
  */
 
 public class Snode {
@@ -19,7 +20,6 @@ public class Snode {
     private char actions[] = new char[2];
     private int moveStepNum = 1;
     private Snode fNode;
-    private Step step;
 
 
     public int getMoveStepNum() {
@@ -98,8 +98,12 @@ public class Snode {
         return resultList;
     }
 
-    private Snode copyNewNode() {
-        Snode newNode = new Snode();
+    void setS(int[][] s) {
+        this.s = s;
+    }
+
+    private void copyNewNode(Snode newNode) {
+        //this->newNode
         for (int i = 0; i < bnum; i++) {
             newNode.bump[i] = bump[i].copyBump();
         }
@@ -111,38 +115,32 @@ public class Snode {
         }
         System.arraycopy(actions, 0, newNode.actions, 0, actions.length);
         newNode.fNode = fNode;
-        newNode.bnum=bnum;
-        return newNode;
+        newNode.bnum = bnum;
+
     }
 
-    void setS(int[][] s) {
-        this.s = s;
-    }
 
     Snode beginSearch() {
         if (bnum < 3) {
             System.out.println("Snode:" + "bump<3");
             return null;
         }
-        if (resultList == null) {
-            resultList = new ArrayList<>();
-        }
+        resultList = resultList == null ? new ArrayList<>() : resultList;
         resultList.clear();
         L.clear();
-
         L.add(this);
 
-        if (search())
-            return reversePath();
-        else return null;
+        return search() ? reversePath() : null;
+//        if (search())
+//            return reversePath();
+//        else return null;
     }
 
     private boolean search() {
         while (!(L.queueIsEmpty())) {//队列不为空
             Snode p = L.DeQueue();
             for (int I = 0; I < bnum; I++) {//块数
-                //Log.d("i->>>",Integer.toString(I));
-                if (p.judgeDir(I))
+                if ((I != p.actions[0] - 1) && p.judgeDir(I))
                     return true;
             }
         }
@@ -150,42 +148,46 @@ public class Snode {
     }
 
     private boolean judgeDir(int I) {
+        int span = (bump[I].state == 's' || bump[I].state == 'h') ? 1 : 2;
+        Snode p, newNode;
         switch (bump[I].state) {
             case 's':
-                if (bump[I].coor[0] != 0 && s[bump[I].coor[0] - 1][bump[I].coor[1]] == 0)
-                    if (moveUp(I))
-                        return true;
-                //向下
-                return (bump[I].coor[0] + 1) != N - 1 && s[bump[I].coor[0] + 2][bump[I].coor[1]] == 0 && (moveDown(I));
-
             case 'S':
-                if (bump[I].coor[0] != 0 && s[bump[I].coor[0] - 1][bump[I].coor[1]] == 0)
-                    if (moveUp(I))
+                for (p = this; p.bump[I].coor[0] != 0 && p.s[p.bump[I].coor[0] - 1][p.bump[I].coor[1]] == 0; p = newNode) {//同一方向深度搜索  (未使用迭代
+                    newNode = new Snode();
+                    if (p.moveUp(I, newNode))
                         return true;
-                return bump[I].coor[0] + 2 != N - 1 && s[bump[I].coor[0] + 3][bump[I].coor[1]] == 0 && moveDown(I);
-
+                }
+                //向下
+                for (p = this; (p.bump[I].coor[0] + span) != N - 1 && p.s[p.bump[I].coor[0] + span + 1][p.bump[I].coor[1]] == 0; p = newNode) {
+                    newNode = new Snode();
+                    if (p.moveDown(I, newNode))
+                        return true;
+                }
+//                return (bump[I].coor[0] + span) != N - 1 && s[bump[I].coor[0] + span + 1][bump[I].coor[1]] == 0 && (moveDown(I));
+                break;
             case 'h':
-                if (bump[I].coor[1] != 0 && s[bump[I].coor[0]][bump[I].coor[1] - 1] == 0)
-                    if (moveLeft(I))
-                        return true;
-
-                return (bump[I].coor[1] + 1) != N - 1 && s[bump[I].coor[0]][bump[I].coor[1] + 2] == 0 && (moveRight(I));
-
             case 'H':
-                if (bump[I].coor[1] != 0 && s[bump[I].coor[0]][bump[I].coor[1] - 1] == 0)
-                    if (moveLeft(I))
+                for (p = this; p.bump[I].coor[1] != 0 && p.s[p.bump[I].coor[0]][p.bump[I].coor[1] - 1] == 0; p = newNode) {
+                    newNode = new Snode();
+                    if (p.moveLeft(I, newNode))
                         return true;
+                }
 
-                return (bump[I].coor[1] + 2) != N - 1 && s[bump[I].coor[0]][bump[I].coor[1] + 3] == 0 && moveRight(I);
+                for (p = this; (p.bump[I].coor[1] + span) != N - 1 && p.s[p.bump[I].coor[0]][p.bump[I].coor[1] + span + 1] == 0; p = newNode) {
+                    newNode = new Snode();
+                    if (p.moveRight(I, newNode))
+                        return true;
+                }
 
-            default://cout + "出错";
-                 return false;
+//                return (bump[I].coor[1] + span) != N - 1 && s[bump[I].coor[0]][bump[I].coor[1] + span + 1] == 0 && (moveRight(I));
+
         }
-
+        return false;
     }
 
-    private boolean moveUp(int n) {
-        Snode newNode = copyNewNode();
+    private boolean moveUp(int n, Snode newNode) {
+        this.copyNewNode(newNode);
         int step = this.bump[n].state == 's' ? 1 : 2;//移动跨度
 
         newNode.s[bump[n].coor[0] + step][bump[n].coor[1]] = 0;
@@ -199,27 +201,25 @@ public class Snode {
     }
 
     private void judgeMoveSameDirection(Snode newNode) {
-        if(this.actions!=null&&(newNode.actions[0] == actions[0]) && actions[1] == newNode.actions[1]){
-            newNode.moveStepNum=moveStepNum+1;//父步数+1
+        if (this.actions != null && (newNode.actions[0] == actions[0]) && actions[1] == newNode.actions[1]) {
+            newNode.moveStepNum = moveStepNum + 1;//父步数+1
             newNode.fNode = this.fNode;//与父同级
-            L.add(L.getQ(),newNode);   //插入，紧接搜索it
         }else {
             newNode.fNode = this;
-            L.add(newNode);   //进表进队
         }
     }
 
-    private boolean judgeIsExistSameAndIsComplete(Snode newNode){
+    private boolean judgeIsExistSameAndIsComplete(Snode newNode) {
+        this.judgeMoveSameDirection(newNode);//判断移动相同方向
         if (!newNode.isExistSame()) {//不存在相同
-            this.judgeMoveSameDirection(newNode);//判断移动相同方向
-
+            L.add(newNode);   //进表进队
             return newNode.IsComplete();
         }
         return false;
     }
 
-    private boolean moveDown(int n) {
-        Snode newNode = copyNewNode();
+    private boolean moveDown(int n, Snode newNode) {
+        this.copyNewNode(newNode);
         int step = this.bump[n].state == 's' ? 1 : 2;//移动跨度
 
         newNode.s[bump[n].coor[0]][bump[n].coor[1]] = 0;
@@ -233,8 +233,8 @@ public class Snode {
         return judgeIsExistSameAndIsComplete(newNode);
     }
 
-    private boolean moveLeft(int n) {
-        Snode newNode = copyNewNode();
+    private boolean moveLeft(int n, Snode newNode) {
+        this.copyNewNode(newNode);
         int step = this.bump[n].state == 'h' ? 1 : 2;//移动跨度
 
         newNode.s[bump[n].coor[0]][bump[n].coor[1] + step] = 0;
@@ -249,8 +249,8 @@ public class Snode {
         return judgeIsExistSameAndIsComplete(newNode);
     }
 
-    private boolean moveRight(int n) {
-        Snode newNode = copyNewNode();
+    private boolean moveRight(int n, Snode newNode) {
+        this.copyNewNode(newNode);
         int step = this.bump[n].state == 'h' ? 1 : 2;//移动跨度
 
         newNode.s[bump[n].coor[0]][bump[n].coor[1]] = 0;
@@ -283,16 +283,12 @@ public class Snode {
     }
 
     private boolean IsComplete() {
-        boolean flag = true;
         for (int i = bump[0].coor[1] + 2; i < N; i++) {
             if (s[2][i] != 0) {
-                flag = false;
-                break;
+                return false;
             }
         }
-        if(flag)
-            L.add(this);//结果放最后
-        return flag;//通
+        return true;//通
     }
 
     private Snode reversePath() {

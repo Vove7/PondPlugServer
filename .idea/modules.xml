@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PondPlugServer.iml" filepath="$PROJECT_DIR$/PondPlugServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pondplug/pondplug.iml" filepath="$PROJECT_DIR$/pondplug/pondplug.iml" />
     </modules>
   </component>
 </project>
