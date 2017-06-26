@@ -11,8 +11,8 @@ import java.util.ArrayList;
 
 public class Snode {
     private final static int N = 6;
-    private static SnodeArrayList L = new SnodeArrayList();//队列&数组
-    private static ArrayList<Snode> resultList;
+    private SnodeArrayList L = new SnodeArrayList();//队列&数组
+    private ArrayList<Snode> resultList;
 
     private int s[][] = new int[N][N];//
     private int bnum;//快数
@@ -42,11 +42,11 @@ public class Snode {
         return N;
     }
 
-    public static SnodeArrayList getL() {
+    public SnodeArrayList getL() {
         return L;
     }
 
-    public static void setL(SnodeArrayList l) {
+    public void setL(SnodeArrayList l) {
         L = l;
     }
 
@@ -236,13 +236,10 @@ public class Snode {
     private boolean moveLeft(int n, Snode newNode) {
         this.copyNewNode(newNode);
         int step = this.bump[n].state == 'h' ? 1 : 2;//移动跨度
-
         newNode.s[bump[n].coor[0]][bump[n].coor[1] + step] = 0;
         newNode.s[bump[n].coor[0]][bump[n].coor[1] - 1] = 1 + n;
         newNode.bump[n].coor[1]--;//块坐标左移 1 为纵坐标
-
         //
-
         newNode.actions[0] = (char) (n + 1);
         newNode.actions[1] = 'L';
 
