@@ -1,5 +1,6 @@
 package cn.vove7.utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -7,7 +8,7 @@ import java.util.ArrayList;
  * 路径
  */
 
-public class ResponseMessage {
+public class ResponseMessage implements Serializable {
     private String message;
     private boolean isHaveResult;
     private int stepNum;
@@ -64,7 +65,7 @@ public class ResponseMessage {
         this.useTime = useTime;
     }
 }
-class Step{
+class Step implements Serializable {
     private int index;
     private int stepNum;
     private int bumpNo;//块序号
