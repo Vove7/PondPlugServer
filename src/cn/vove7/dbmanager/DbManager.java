@@ -15,8 +15,8 @@ public class DbManager {
     private static final String databaseName = "pondplug";
     private static final String DB_Url = "jdbc:mysql://localhost:3306/" + databaseName + "?characterEncoding=utf8&useSSL=false";
 
-    private static final String db_User = "webuser";
-    private static final String password = "iamuser";
+    private static final String db_User = "your username";
+    private static final String password = "your password";
 
     private PreparedStatement pStatement = null;
 
